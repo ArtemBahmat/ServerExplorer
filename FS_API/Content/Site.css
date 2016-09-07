@@ -1,0 +1,112 @@
+﻿body { 
+    color:#ffffff; 
+    font-size: 12px;
+    font-family: Verdana, Arial, Helvetica, Sans-Serif;
+    background-color:rgb(105, 78, 78);
+    padding-left:40px;
+}
+
+.folders {
+    color:#ffffff;
+    font-weight:bold;
+}
+
+.files{
+    width: 15%;
+    color:#f5f3c2;
+    font-weight:bold;
+    padding-left: 8px;
+}
+
+a:hover {
+    color: #f55e5e !important;
+}
+
+.upper{
+    color:#ffffff;
+    font-weight:bold;
+    font-size:14px;
+    letter-spacing: 3px;
+}
+
+.upper_td{
+    height:21px;
+    padding-left: 17px;
+    padding-top: 1px;
+    padding-bottom:1px;
+}
+
+
+.path{
+
+    width:80%;
+    color:#ffffff; 
+    font-size: 14px;
+    font-family: Courier New, Courier, monospace;
+    background-color:rgb(189, 69, 69);
+}
+
+.dotdot {
+  padding-left: 17px;
+  padding-top: 1px;
+  padding-bottom:1px;
+  letter-spacing: 3px;
+  height:50px;
+}
+
+.fs{
+    background-color:rgb(113, 60, 60);
+    width:100%;
+    line-height:1.6;
+    
+}
+
+.drives{
+    font-family:Arial;
+    font-weight:bold;
+    color: #030862;
+    width:170px;
+}
+
+.main_table{
+    width:80%;
+}
+
+.td_info{
+    vertical-align: top;
+    width: 50%;
+}
+
+.inf_table{
+    border:hidden;
+    font-size: 20px;
+    font-family: 'Times New Roman';
+    width: 100%;
+    background-color:rgb(113, 60, 60);
+    border-color:rgb(87, 76, 76);
+}
+.head_of_inf_table {
+    text-align: center;
+    background-color:rgb(91, 63, 63);;
+    height: 40px;
+}
+.bottom_of_inf_table {
+    height: 60px;
+    text-align: center;
+}
+
+
+
+.loading_message {
+    color: #f75e1a;
+    font-size: 35px;
+    
+}
+
+.loading_message_tr{
+    -ms-align-content: center;
+    -webkit-align-content: center;
+    align-content: center;
+    height:50px;
+}
+

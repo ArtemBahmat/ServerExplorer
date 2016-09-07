@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <link href="/Content/Site.css" rel="stylesheet">
+    <title>Server Browser</title>
+</head>
+
+<body ng-app="ExplorerApp">
+    <div ng-controller="ExplorerController">
+        
+        <table class="path" align="center">
+            <tr>
+                <td class="files">
+                    Current path:
+                </td>
+                <td>
+                    {{ explorer.CurrentPath}}
+                </td>
+            </tr>
+        </table>
+
+        
+        <!-- BEGIN of global table -->
+        <table class="main_table" align="center">
+            <tr class="loading_message_tr">
+                <td colspan="2" align="center" class="loading_message">
+
+                    <!--------------- Loading status block -------------->
+                    <div class="loading_message" loading-status-message>Loading...</div>
+
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" class="td_info">
+
+
+                    <!-- BEGIN of table with fs-tree -->
+                    <table class="fs">
+                        <tr class="drives">
+                            <td>
+                                <div ng-repeat="drive in explorer.DriveList">
+                                    <input ng-click="goToDir(drive.Name, '')"
+                                           class="drives" name="MyName" type="button"
+                                           value="{{drive.Label}}: {{drive.Name}}" />       <!-- GO TO ROOT OF SELECTED DRIVE -->
+
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="upper_td">
+                                <a class="upper" href="javascript:;" ng-click="goToDir('', '')">
+                                    <!-- GO TO PARENT DIR -->
+                                    <div ng-hide="explorer.ParentDirPath == ''">..</div>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+
+                                <div ng-repeat="directory in explorer.DirectoryList">
+                                    [ <a class="folders" href="javascript:;" ng-click="goToDir('', directory.Name)">
+                                        <!-- GO INTO SELECTED DIR -->
+                                        {{directory.Name}}
+                                    </a> ]
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div ng-repeat="file in explorer.FileList">
+                                    <a class="files" href="javascript:;">
+                                        {{file.Name}}
+                                    </a>
+                                </div>
+
+                            </td>
+                        </tr>
+                    </table>
+                    <!-- END of table with fs-tree -->
+
+                </td>
+                <td class="td_info">
+
+                    <!-- BEGIN of files information table -->
+                    <table class="inf_table">
+                        <tr class="head_of_inf_table">
+                            <td>Less 10 Mb</td>
+                            <td>10 Mb - 50 Mb</td>
+                            <td>More 100 Mb</td>
+                        </tr>
+                        <tr class="bottom_of_inf_table">
+                            <td>{{ explorer.DirInfo.CountFilesLess10Mb}}</td>
+                            <td>{{ explorer.DirInfo.CountFiles10_50Mb}}</td>
+                            <td>{{ explorer.DirInfo.CountFilesMore100Mb}}</td>
+                        </tr>
+                    </table>
+
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+            </tr>
+        </table>
+        <!-- END of global table -->
+
+        
+    </div>
+</body>
+</html>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
+
+
+
+<script>
+    angular.module("ExplorerApp", ['loadingStatus'])
+        .controller("ExplorerController", ['$scope', '$http', function ($scope, $http) {
+
+        $http.get('http://localhost:1110/api/explorer').
+         success(function (data, status, headers, config) {
+             $scope.explorer = data;
+         }).
+         error(function (data, status, headers, config) {
+             alert("Error: the list of directories and files hasn't been created");
+         });
+
+
+           
+        $scope.goToDir = function (path, dirName) {
+
+            if (dirName == '' && path == '') {   // go to Parent Directory (both params are empty) 
+                var fullPath = $scope.explorer.ParentDirPath;
+            }
+            if (path != '') {               // go to Root (1-st param 'path' is only identified) 
+                var fullPath = path;
+            } 
+            if (dirName != '') {           // go to Child Directory (2-nd param 'dirName' is only identified)
+                var fullPath = $scope.explorer.CurrentPath + dirName + "\\";
+            }
+            if (path != '' && dirName != '') {           
+                var fullPath = path;
+            }
+
+            $http({
+                method: "POST",
+                url: "http://localhost:1110/api/explorer",
+                data: JSON.stringify(fullPath)
+            }).
+            success(function (data, status, headers, config) {
+                if (data != "null") {         // check if exception error has not been got
+                    $scope.explorer = data;
+                }
+            }).
+            error(function (data, status, headers, config) {
+                alert("Error: the new list of directories and files hasn't been created");
+            });
+        };
+
+    }]);
+
+
+
+
+
+    //---------------  Loading status Module -------------------//
+
+        angular.module('loadingStatus', [])
+
+    .config(function ($httpProvider) {
+        $httpProvider.interceptors.push('loadingStatusInterceptor');
+    })
+
+    .directive('loadingStatusMessage', function () {
+        return {
+            link: function ($scope, $element, attrs) {
+                var show = function () {
+                    $element.css('display', 'block');
+                };
+                var hide = function () {
+                    $element.css('display', 'none');
+                };
+                $scope.$on('loadingStatusActive', show);
+                $scope.$on('loadingStatusInactive', hide);
+                hide();
+            }
+        };
+    })
+
+    .factory('loadingStatusInterceptor', function ($q, $rootScope) {
+        var activeRequests = 0;
+        var started = function () {
+            if (activeRequests == 0) {
+                $rootScope.$broadcast('loadingStatusActive');
+            }
+            activeRequests++;
+        };
+        var ended = function () {
+            activeRequests--;
+            if (activeRequests == 0) {
+                $rootScope.$broadcast('loadingStatusInactive');
+            }
+        };
+        return {
+            request: function (config) {
+                started();
+                return config || $q.when(config);
+            },
+            response: function (response) {
+                ended();
+                return response || $q.when(response);
+            },
+            responseError: function (rejection) {
+                ended();
+                return $q.reject(rejection);
+            }
+        };
+    });
+
+
+
+</script>
+
+
+
+
